@@ -1,0 +1,20 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# macOS
+.DS_Store
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# CocoaPods (si ajouté plus tard pour Firebase)
+Pods/
+
+# Secrets Firebase (ne jamais commiter)
+GoogleService-Info.plist

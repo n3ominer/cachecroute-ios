@@ -1,0 +1,8 @@
+{
+  "images" : [
+    { "idiom" : "universal", "filename" : "ill_onboarding_house.svg" },
+    { "idiom" : "universal", "filename" : "ill_onboarding_house_dark.svg", "appearances" : [ { "appearance" : "luminosity", "value" : "dark" } ] }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 },
+  "properties" : { "preserves-vector-representation" : true }
+}
