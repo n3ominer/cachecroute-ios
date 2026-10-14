@@ -38,26 +38,37 @@ struct OnboardingStoreTests {
 
 @MainActor
 struct RootModelTests {
-    /// S1-02 — tableau de vérité du `RootModel` (version onboarding).
+    private func loggedInService() async -> FakeAuthService {
+        let service = FakeAuthService()
+        _ = try? await service.signIn(email: "demo@cachecrout.app", password: "motdepasse1")
+        return service
+    }
+
+    /// S1-02 — tableau de vérité du `RootModel` (onboarding + session).
     @Test func onboardingNonVuDemarreSurOnboarding() {
-        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: false))
+        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: false), authService: FakeAuthService())
         #expect(model.startDestination == .onboarding)
     }
 
-    @Test func onboardingVuDemarreSurHome() {
-        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: true))
+    @Test func vuMaisDeconnecteDemarreSurAuth() {
+        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: true), authService: FakeAuthService())
+        #expect(model.startDestination == .auth)
+    }
+
+    @Test func vuEtConnecteDemarreSurHome() async {
+        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: true), authService: await loggedInService())
         #expect(model.startDestination == .home)
     }
 
     @Test func pasPretResteSurLoading() {
-        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: true, ready: false))
+        let model = RootModel(onboardingStore: FakeOnboardingStore(seen: true, ready: false), authService: FakeAuthService())
         #expect(model.startDestination == .loading)
     }
 
-    @Test func markOnboardingSeenFaitPasserAHome() {
+    @Test func markOnboardingSeenPuisNonConnecteDonneAuth() {
         let store = FakeOnboardingStore(seen: false)
-        let model = RootModel(onboardingStore: store)
+        let model = RootModel(onboardingStore: store, authService: FakeAuthService())
         model.markOnboardingSeen()
-        #expect(model.startDestination == .home)
+        #expect(model.startDestination == .auth)
     }
 }

@@ -3,16 +3,17 @@ import Foundation
 /// Racine de composition (« composition root ») : le SEUL endroit qui fabrique et câble les
 /// services de l'app.
 ///
-/// PÉDAGO : c'est l'équivalent iOS des modules Hilt d'Android, mais explicite et sans magie. Chaque
-/// feature ajoutera ici son service (auth, maison) et la « cascade » de dépendances qu'il entraîne.
-/// On injecte ensuite ce conteneur vers le bas de l'arbre de vues ; les vues en extraient ce dont
-/// elles ont besoin pour construire leurs modèles. Avantage : testable (on peut fabriquer un
-/// conteneur avec des faux) et lisible (tout le câblage est à un seul endroit).
+/// PÉDAGO : équivalent iOS des modules Hilt, mais explicite. Le choix d'implémentation se fait ICI,
+/// à un seul endroit. Par défaut on branche `FakeAuthService` (aucun réseau). Pour utiliser le vrai
+/// Firebase, on remplacerait par `FirebaseAuthService()` (voir ce fichier) — les écrans, eux, ne
+/// dépendent que du protocole `AuthService` : ils ignorent quel moteur est derrière.
 @MainActor
 final class AppDependencies {
     let onboardingStore: OnboardingStore
+    let authService: AuthService
 
-    init(onboardingStore: OnboardingStore? = nil) {
+    init(onboardingStore: OnboardingStore? = nil, authService: AuthService? = nil) {
         self.onboardingStore = onboardingStore ?? UserDefaultsOnboardingStore()
+        self.authService = authService ?? FakeAuthService()
     }
 }

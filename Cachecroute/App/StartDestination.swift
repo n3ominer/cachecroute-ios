@@ -10,6 +10,8 @@ enum StartDestination: Equatable {
     case loading
     /// Onboarding pas encore vu.
     case onboarding
+    /// Onboarding vu mais utilisateur non connecté.
+    case auth
     /// Accueil.
     case home
 }

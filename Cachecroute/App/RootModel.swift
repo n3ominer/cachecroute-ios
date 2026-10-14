@@ -4,30 +4,34 @@ import Observation
 /// Décide de l'écran de départ. **Seul endroit** qui porte cette décision.
 ///
 /// PÉDAGO :
-///  - `@Observable` : `startDestination` est une propriété CALCULÉE qui lit l'état du store. Comme
-///    le store est lui-même `@Observable`, toute vue qui lit `startDestination` se recompose quand
-///    `hasSeenOnboarding` change. C'est l'équivalent iOS du `combine(...).stateIn(...)` d'Android :
-///    on fusionne des sources d'état réactives, ici une seule (l'onboarding). On en ajoutera.
+///  - `startDestination` est CALCULÉE à partir de plusieurs sources observables (onboarding +
+///    session). C'est l'équivalent iOS du `combine(onboarding, session)` d'Android : quand l'une
+///    d'elles change (connexion, déconnexion), la propriété se recalcule et l'UI se recompose.
+///  - On ajoutera la maison en séance 2 (troisième source).
 ///
-/// Tableau de vérité (version séance 1·A) :
-///   pas prêt                 → .loading (écran de lancement)
-///   onboarding non vu        → .onboarding
-///   onboarding vu            → .home
+/// Tableau de vérité (version séance 1) :
+///   pas prêt                              → .loading
+///   onboarding non vu                     → .onboarding
+///   vu + non connecté                     → .auth
+///   vu + connecté                         → .home
 @Observable
 @MainActor
 final class RootModel {
     @ObservationIgnored private let onboardingStore: OnboardingStore
+    @ObservationIgnored private let authService: AuthService
 
-    init(onboardingStore: OnboardingStore) {
+    init(onboardingStore: OnboardingStore, authService: AuthService) {
         self.onboardingStore = onboardingStore
+        self.authService = authService
     }
 
     var startDestination: StartDestination {
         guard onboardingStore.isReady else { return .loading }
-        return onboardingStore.hasSeenOnboarding ? .home : .onboarding
+        if !onboardingStore.hasSeenOnboarding { return .onboarding }
+        if authService.currentUser == nil { return .auth }
+        return .home
     }
 
-    /// Appelé quand l'utilisateur termine (ou passe) l'onboarding.
     func markOnboardingSeen() {
         onboardingStore.markSeen()
     }
