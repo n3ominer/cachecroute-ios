@@ -10,23 +10,34 @@ import Observation
 ///  - On ajoutera la maison en séance 2 (troisième source).
 ///
 /// Tableau de vérité (version séance 1) :
-///   pas prêt                              → .loading
+///   pas prêt ou splash encore affiché      → .loading
 ///   onboarding non vu                     → .onboarding
 ///   vu + non connecté                     → .auth
 ///   vu + connecté                         → .home
 @Observable
 @MainActor
 final class RootModel {
+    private static let minimumSplashDurationNanoseconds: UInt64 = 4_000_000_000
+
     @ObservationIgnored private let onboardingStore: OnboardingStore
     @ObservationIgnored private let authService: AuthService
+
+    private(set) var hasFinishedSplashDelay = false
 
     init(onboardingStore: OnboardingStore, authService: AuthService) {
         self.onboardingStore = onboardingStore
         self.authService = authService
+
+        // UserDefaults est lu de façon synchrone : garde le splash visible au moins une seconde.
+        // Task.sleep suspend cette tâche sans bloquer le thread principal.
+        Task {
+            try? await Task.sleep(nanoseconds: RootModel.minimumSplashDurationNanoseconds)
+            hasFinishedSplashDelay = true
+        }
     }
 
     var startDestination: StartDestination {
-        guard onboardingStore.isReady else { return .loading }
+        guard onboardingStore.isReady, hasFinishedSplashDelay else { return .loading }
         if !onboardingStore.hasSeenOnboarding { return .onboarding }
         if authService.currentUser == nil { return .auth }
         return .home
