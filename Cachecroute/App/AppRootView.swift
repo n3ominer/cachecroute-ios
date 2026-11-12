@@ -14,17 +14,21 @@ struct AppRootView: View {
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
-        _root = State(initialValue: RootModel(onboardingStore: dependencies.onboardingStore))
+        _root = State(
+            initialValue: RootModel(
+                onboardingStore: dependencies.onboardingStore,
+                // TODO: ajouter la dependance vers le service d'auth dans ApPDependencies
+            )
+        )
     }
 
     var body: some View {
         switch root.startDestination {
-        case .loading:
-            SplashView()
-        case .onboarding:
-            OnboardingView(onFinished: { root.markOnboardingSeen() })
-        case .home:
-            HomeView()
+            case .loading:    SplashView()
+            case .onboarding: OnboardingView(onFinished: { root.markOnboardingSeen() })
+            case .home:       HomeView()
+                
+            // TODO: Ajouter un cas de route de depart pour l'auth
         }
     }
 }

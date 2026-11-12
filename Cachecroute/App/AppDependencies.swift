@@ -11,8 +11,14 @@ import Foundation
 @MainActor
 final class AppDependencies {
     let onboardingStore: OnboardingStore
+    
+    // TODO: Ajouter une reference vers le service (repository d'authentification créé)
 
-    init(onboardingStore: OnboardingStore? = nil) {
+    init(
+        onboardingStore: OnboardingStore? = nil,
+        // TODO: Ajouter un param pour l'injection de la dependance du service (repository)
+    ) {
         self.onboardingStore = onboardingStore ?? UserDefaultsOnboardingStore()
+        // TODO: Instancier le service
     }
 }
